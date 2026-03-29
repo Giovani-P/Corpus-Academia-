@@ -1,0 +1,192 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  settings Settings?
+  sessions Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Settings {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  // WhatsApp
+  whatsappPhoneNumberId String?
+  whatsappAccessToken   String?
+  whatsappConnected     Boolean @default(false)
+
+  // Google Calendar
+  googleAccessToken  String?
+  googleRefreshToken String?
+  googleCalendarId   String?
+  googleConnected    Boolean @default(false)
+
+  // SCA
+  scaLastUpload DateTime?
+  scaConnected  Boolean   @default(false)
+
+  // Catraca
+  catracaIp       String?
+  catracaPort     String?
+  catracaUsername String?
+  catracaPassword String?
+  catracaConnected Boolean @default(false)
+
+  // Informações da academia (usadas pelo bot)
+  academiaName        String?
+  academiaHorarios    String?
+  academiaPrecos      String?
+  academiaModalidades String?
+  natacaoTurmas       String?
+  natacaoVagas        String?
+  botTone             String  @default("DESCONTRAIDO")
+
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ── BOT ──────────────────────────────────────────────────────
+
+model Conversation {
+  id          String   @id @default(cuid())
+  phone       String   @unique
+  flow        String   @default("UNKNOWN") // ACADEMIA | NATACAO | AGENDAMENTO | UNKNOWN
+  step        String   @default("INICIO")
+  data        String   @default("{}") // JSON serializado
+  escalated   Boolean  @default(false)
+  lastMessage DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AutomacaoLog {
+  id         String   @id @default(cuid())
+  tipo       String   // ANIVERSARIO | COBRANCA | NPS | REATIVACAO
+  phone      String
+  alunoNome  String
+  sentAt     DateTime @default(now())
+  metadata   String?  // JSON extra
+
+  @@index([tipo, phone])
+  @@index([sentAt])
+}
+
+model NPSResponse {
+  id          String   @id @default(cuid())
+  phone       String
+  alunoNome   String?
+  score       Int      // 0–10
+  respondedAt DateTime @default(now())
+
+  @@index([respondedAt])
+}
+
+model SCAAluno {
+  id             String   @id @default(cuid())
+  nome           String
+  telefone       String?
+  email          String?
+  dataNasc       String?  // dd/mm/aaaa
+  plano          String?
+  valorPlano     Float?
+  vencimento     String?  // dd/mm/aaaa
+  dataMatricula  String?
+  status         String   @default("ATIVO") // ATIVO | INADIMPLENTE | INATIVO
+  extra          String?  // JSON com campos extras do CSV
+  uploadedAt     DateTime @default(now())
+
+  @@index([status])
+  @@index([dataNasc])
+}
+
+model TrainingSheet {
+  id           String    @id @default(cuid())
+  token        String    @unique @default(cuid())
+  nome         String
+  phone        String
+  objetivo     String
+  limitacoes   String?
+  nivel        String    @default("INICIANTE") // INICIANTE | INTERMEDIARIO | AVANCADO
+  diasSemana   Int       @default(3)
+  fichaGerada  String?   // Markdown gerado pelo Claude Haiku
+  fichaEditada String?   // Versão editada pelo Rafa
+  status       String    @default("PENDING") // PENDING | APPROVED | SENT
+  approvedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([status])
+  @@index([phone])
+}
+
+model Appointment {
+  id           String   @id @default(cuid())
+  phone        String
+  name         String?
+  googleEventId String?
+  startTime    DateTime
+  endTime      DateTime
+  notes        String?
+  status       String   @default("SCHEDULED") // SCHEDULED | CANCELLED | DONE
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([phone])
+  @@index([startTime])
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  name      String?
+  phone     String
+  objective String?
+  source    String   @default("WHATSAPP") // WHATSAPP | NATACAO
+  createdAt DateTime @default(now())
+
+  @@index([phone])
+  @@index([createdAt])
+}
+
+model NatacaoEnrollment {
+  id                   String   @id @default(cuid())
+  responsavelNome      String
+  phone                String
+  criancaNome          String
+  dataNasc             String
+  turma                String?
+  necessidadesEspeciais String?
+  status               String   @default("PENDING") // PENDING | CONFIRMED | WAITING_LIST
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([phone])
+  @@index([status])
+}

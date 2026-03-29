@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: file:./prisma/dev.db
+      NEXTAUTH_SECRET: test-secret-key-muito-longo-para-desenvolvimento-local
+      NEXTAUTH_URL: http://localhost:3000
+      NODE_ENV: development
+    volumes:
+      - ./prisma:/app/prisma
+    working_dir: /app
+
+  # Para produção com PostgreSQL:
+  # postgres:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_DB: corpus_academia
+  #     POSTGRES_USER: admin
+  #     POSTGRES_PASSWORD: changeme
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #
+  # volumes:
+  #   postgres_data:

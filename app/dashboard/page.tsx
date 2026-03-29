@@ -167,7 +167,7 @@ export default async function DashboardPage() {
               <Badge variant="warning">{aniversariantesHoje.length}</Badge>
             </div>
             <div className="flex flex-col gap-1.5">
-              {aniversariantesHoje.slice(0, 5).map((a) => (
+              {aniversariantesHoje.slice(0, 5).map((a: AlunoBasico) => (
                 <div key={a.id} className="flex items-center justify-between text-sm">
                   <span className="text-[#F1F5F9]">{a.nome}</span>
                   <span className="text-xs text-[#475569]">{a.telefone ?? "—"}</span>

@@ -15,6 +15,7 @@ import {
   LogOut,
   QrCode,
   Zap,
+  Video,
 } from "lucide-react";
 
 const navItems = [
@@ -22,6 +23,7 @@ const navItems = [
   { href: "/dashboard/conversas", label: "Conversas", icon: MessageSquare },
   { href: "/dashboard/agendamentos", label: "Agendamentos", icon: Calendar },
   { href: "/dashboard/treinos", label: "Treinos IA", icon: Dumbbell },
+  { href: "/dashboard/videos", label: "Vídeos Virais", icon: Video },
   { href: "/dashboard/leads", label: "Leads", icon: Users },
   { href: "/dashboard/qrcode", label: "QR Code", icon: QrCode },
   { href: "/dashboard/relatorios", label: "Relatórios", icon: BarChart3 },

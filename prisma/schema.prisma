@@ -4,12 +4,13 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -68,6 +69,9 @@ model Settings {
   natacaoTurmas       String?
   natacaoVagas        String?
   botTone             String  @default("DESCONTRAIDO")
+
+  // Mercado Pago
+  mercadopagoAccessToken String?
 
   updatedAt DateTime @updatedAt
 
@@ -190,4 +194,39 @@ model NatacaoEnrollment {
 
   @@index([phone])
   @@index([status])
+}
+
+// ── VÍDEOS ───────────────────────────────────────────────────
+
+model VideoRoteiro {
+  id        String   @id @default(cuid())
+  tema      String   // Ex: "Como fazer rosca barra perfeita"
+  categoria String   // MUSCULACAO | NATACAO | SUPLEMENTOS | MOTIVACAO | DICA
+  duracao   String   // 30s | 60s | 90s
+  roteiro   String   // Markdown com roteiro completo
+  hashtags  String?  // JSON array de hashtags
+  createdAt DateTime @default(now())
+
+  @@index([categoria])
+  @@index([createdAt])
+}
+
+// ── CHECKOUT ─────────────────────────────────────────────────
+
+model CheckoutSession {
+  id              String   @id @default(cuid())
+  mercadopagoId   String   @unique
+  phone           String
+  email           String
+  nome            String
+  plano           String   // MENSAL | TRIMESTRAL | ANUAL
+  valor           Float
+  status          String   @default("PENDING") // PENDING | APPROVED | REJECTED | REFUNDED
+  mercadopagoData String?  // JSON com resposta do MP
+  createdAt       DateTime @default(now())
+  approvedAt      DateTime?
+
+  @@index([phone])
+  @@index([status])
+  @@index([approvedAt])
 }
